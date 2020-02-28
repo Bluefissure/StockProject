@@ -13,11 +13,11 @@ class Stock(models.Model):
 class HistoricalPriceTile(models.Model):
     stock = models.ForeignKey(Stock, on_delete=models.CASCADE, related_name='historical_price')
     date = models.DateField()
-    open = models.DecimalField(max_digits=16, decimal_places=6)
-    high = models.DecimalField(max_digits=16, decimal_places=6)
-    low = models.DecimalField(max_digits=16, decimal_places=6)
-    close = models.DecimalField(max_digits=16, decimal_places=6)
-    adj_close = models.DecimalField(max_digits=16, decimal_places=6)
+    open = models.DecimalField(max_digits=32, decimal_places=16)
+    high = models.DecimalField(max_digits=32, decimal_places=16)
+    low = models.DecimalField(max_digits=32, decimal_places=16)
+    close = models.DecimalField(max_digits=32, decimal_places=16)
+    adj_close = models.DecimalField(max_digits=32, decimal_places=16)
     volume = models.IntegerField()
 
     class Meta:
@@ -27,7 +27,7 @@ class HistoricalPriceTile(models.Model):
 class LivePriceTile(models.Model):
     stock = models.ForeignKey(Stock, on_delete=models.CASCADE, related_name='live_price')
     time = models.DateTimeField()
-    price = models.DecimalField(max_digits=16, decimal_places=6)
+    price = models.DecimalField(max_digits=32, decimal_places=16)
     volume = models.IntegerField()
 
     class Meta:

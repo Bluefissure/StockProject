@@ -19,3 +19,11 @@
 1. `python manage.py makemigrations`
 1. `python manage.py migrate`
 
+## Stock data crawler
+
+Implemented by [yahoo_fin](https://github.com/atreadw1492/yahoo_fin).
+
+Please go into [stockapp/crawler/](https://github.com/Bluefissure/StockProject/tree/master/stockapp/crawler) and
+ run `python *_crawler.py -h` for more help.
+
+You can either run cron tasks in Linux/Unix or use the standalone mode to establish a daemon.
