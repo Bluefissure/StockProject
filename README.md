@@ -27,3 +27,9 @@ Please go into [stockapp/crawler/](https://github.com/Bluefissure/StockProject/t
  run `python *_crawler.py -h` for more help.
 
 You can either run cron tasks in Linux/Unix or use the standalone mode to establish a daemon.
+
+## REST API
+- Design&manage by [django-rest-framework](https://www.django-rest-framework.org/)
+- Documented by [drf-yasg](https://github.com/axnsan12/drf-yasg)
+
+Please read `/swagger/` after running the demo for the details.
