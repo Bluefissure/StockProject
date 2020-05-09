@@ -22,3 +22,4 @@ class LivePriceTileAdmin(admin.ModelAdmin):
 admin.site.register(Stock, StockAdmin)
 admin.site.register(HistoricalPriceTile, HistoricalPriceTileAdmin)
 admin.site.register(LivePriceTile, LivePriceTileAdmin)
+admin.site.register(User)
