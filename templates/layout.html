@@ -43,32 +43,32 @@
           </ul>
         </li>
       {% else %}
-{#        <li class="nav-item dropdown user user-menu">#}
-{#          <a class="nav-link" data-toggle="dropdown" href="#">#}
-{#            <img src="{% static "dist/img/tata.jpg" %}"#}
-{#                 class="user-image" alt="User Image">#}
-{#            <span class="hidden-xs">光之呆呆</span>#}
-{#          </a>#}
-{#          <ul class="dropdown-menu dropdown-menu-right">#}
-{#            <!-- User image -->#}
-{#            <li class="user-header bg-gray">#}
-{#              <img src="{% static "dist/img/tata.jpg" %}"#}
-{#                   alt="User Avatar" class="img-circle align-items-center" style="width: 128px;height: auto;">#}
-{#              <p class="text-center">#}
-{#                光之呆呆#}
-{#              </p>#}
-{#            </li>#}
-{#            <!-- Menu Footer-->#}
-{#            <li class="user-footer">#}
-{#              <div class="float-left">#}
-{#                <a href="/register" class="btn btn-default bg-blue">注册</a>#}
-{#              </div>#}
-{#              <div class="float-right">#}
-{#                <a href="/login" class="btn btn-default bg-blue">登录</a>#}
-{#              </div>#}
-{#            </li>#}
-{#          </ul>#}
-{#        </li>#}
+        <li class="nav-item dropdown user user-menu">
+          <a class="nav-link" data-toggle="dropdown" href="#">
+            <img src="{% static "dist/img/guest.jpg" %}"
+                 class="user-image" alt="User Image">
+            <span class="hidden-xs">Guest</span>
+          </a>
+          <ul class="dropdown-menu dropdown-menu-right">
+            <!-- User image -->
+            <li class="user-header bg-gray">
+              <img src="{% static "dist/img/guest.jpg" %}"
+                   alt="User Avatar" class="img-circle align-items-center" style="width: 128px;height: auto;">
+              <p class="text-center">
+                Guest
+              </p>
+            </li>
+            <!-- Menu Footer-->
+            <li class="user-footer">
+              <div class="float-left">
+                <a href="/register" class="btn btn-default bg-blue">Register</a>
+              </div>
+              <div class="float-right">
+                <a href="/login" class="btn btn-default bg-blue">Login</a>
+              </div>
+            </li>
+          </ul>
+        </li>
       {% endif %}
       </ul>
     </nav>
@@ -90,7 +90,7 @@
           <div class="image">
 {#            <img src="{% if user %}{{ user.avatar }}{% else %}{% static "dist/img/bluefissure.jpg" %}{% endif %}"#}
 {#                 class="img-circle" alt="User Image">#}
-            <img src="{% static "dist/img/bluefissure.jpg" %}"
+            <img src="{% if user %}{% static "dist/img/bluefissure.jpg" %}{% else %}{% static "dist/img/guest.jpg" %}{% endif %}"
                  class="img-circle" alt="User Image">
           </div>
           <div class="info">
