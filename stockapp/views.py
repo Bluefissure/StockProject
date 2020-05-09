@@ -69,7 +69,7 @@ def login(req):
         else:
             return HttpResponseRedirect("/index")
     elif req.method == 'POST':
-        user = auth.authenticate(username=req.POST.get('Email'), password=req.POST.get('Password'))
+        user = auth.authenticate(username=req.POST.get('Username'), password=req.POST.get('Password'))
         if user:
             auth.login(req, user)
             next = req.session.get('next', '/index')
@@ -96,12 +96,12 @@ def register(req):
         else:
             return HttpResponseRedirect('/')
     elif req.method == 'POST':
-        email = req.POST.get('Email')
-        emailresult = User.objects.filter(username=email)
-        if not email:
-            return ren2res('register.html', req, {'err': "Email format Error"})
-        elif emailresult.exists():
-            return ren2res('register.html', req, {'err': "This address has been registered"})
+        name = req.POST.get('Username')
+        user_result = User.objects.filter(username=name)
+        if not name:
+            return ren2res('register.html', req, {'err': "Username format Error"})
+        elif user_result.exists():
+            return ren2res('register.html', req, {'err': "This username has been registered"})
         elif not req.POST.get('TOS'):
             return ren2res('register.html', req, {'err': "Please read and accept the terms of use"})
         else:
@@ -114,14 +114,14 @@ def register(req):
             else:
                 try:
                     with transaction.atomic():
-                        newuser = User()
-                        newuser.username = email
-                        newuser.set_password(pw1)
-                        newuser.save()
-                        newinfo = UserInfo(user=newuser)
-                        newinfo.save()
-                        newuser = auth.authenticate(username=email, password=pw1)
-                        auth.login(req, user=newuser)
+                        new_user = User()
+                        new_user.username = name
+                        new_user.set_password(pw1)
+                        new_user.save()
+                        new_info = UserInfo(user=new_user)
+                        new_info.save()
+                        new_user = auth.authenticate(username=name, password=pw1)
+                        auth.login(req, user=new_user)
                         next = req.session.get('next')
                         if next:
                             return HttpResponseRedirect(next)
