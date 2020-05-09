@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 # Create your models here.
 
@@ -33,3 +34,10 @@ class LivePriceTile(models.Model):
     class Meta:
         unique_together = ('stock', 'time')
 
+
+class UserInfo(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, blank=True, null=True, related_name="info")
+    stocks = models.ManyToManyField(Stock, related_name='sub_users', blank=True)
+
+    def __str__(self):
+        return str(self.user)
