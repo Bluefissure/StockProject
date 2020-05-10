@@ -28,6 +28,7 @@
                             <thead>
                             <tr>
                               <th style="text-align: center;">Corp</th>
+                              <th style="text-align: center;">Date</th>
                               <th style="text-align: center;">Open</th>
                               <th style="text-align: center;">High</th>
                               <th style="text-align: center;">Low</th>
@@ -36,23 +37,25 @@
                               <!-- <th><center>配置</center></th> -->
                             </tr>
                             </thead>
-                            <tbody>
-                                <tr>
-                                    <td style="text-align: center; vertical-align: middle">1</td>
-                                    <td style="text-align: center; vertical-align: middle">2</td>
-                                    <td style="text-align: center; vertical-align: middle">3</td>
-                                    <td style="text-align: center; vertical-align: middle">4</td>
-                                    <td style="text-align: center; vertical-align: middle">5</td>
-                                    <td style="text-align: center; vertical-align: middle">6</td>
-                                </tr>
-                                <tr>
-                                    <td style="text-align: center; vertical-align: middle">6</td>
-                                    <td style="text-align: center; vertical-align: middle">5</td>
-                                    <td style="text-align: center; vertical-align: middle">4</td>
-                                    <td style="text-align: center; vertical-align: middle">3</td>
-                                    <td style="text-align: center; vertical-align: middle">2</td>
-                                    <td style="text-align: center; vertical-align: middle">1</td>
-                                </tr>
+                            <tbody id="query-results">
+{#                                <tr>#}
+{#                                    <td style="text-align: center; vertical-align: middle">1</td>#}
+{#                                    <td style="text-align: center; vertical-align: middle">2</td>#}
+{#                                    <td style="text-align: center; vertical-align: middle">3</td>#}
+{#                                    <td style="text-align: center; vertical-align: middle">4</td>#}
+{#                                    <td style="text-align: center; vertical-align: middle">5</td>#}
+{#                                    <td style="text-align: center; vertical-align: middle">6</td>#}
+{#                                    <td style="text-align: center; vertical-align: middle">7</td>#}
+{#                                </tr>#}
+{#                                <tr>#}
+{#                                    <td style="text-align: center; vertical-align: middle">7</td>#}
+{#                                    <td style="text-align: center; vertical-align: middle">6</td>#}
+{#                                    <td style="text-align: center; vertical-align: middle">5</td>#}
+{#                                    <td style="text-align: center; vertical-align: middle">4</td>#}
+{#                                    <td style="text-align: center; vertical-align: middle">3</td>#}
+{#                                    <td style="text-align: center; vertical-align: middle">2</td>#}
+{#                                    <td style="text-align: center; vertical-align: middle">1</td>#}
+{#                                </tr>#}
                             </tbody>
                           </table>
                         </div>
@@ -87,14 +90,14 @@
                                                         <option>Highest</option>
                                                         <option>Average</option>
                                                         <option>Lowest</option>
-                                                        <option>LessThanLowest</option>
+                                                        <option>AverageLessThanLowest</option>
                                                     </select>
                                                 </div>
                                             </div>
                                             <div class="col-md-3">
                                                 <div class="form-group">
-                                                    <label> Select Stocks</label>
-                                                    <select multiple="" class="custom-select" id="select-stocks">
+                                                    <label> Select Stock</label>
+                                                    <select class="custom-select" id="select-stock">
                                                     </select>
                                                 </div>
                                             </div>
@@ -137,6 +140,15 @@
     <script src="{% static "plugins/moment/moment.min.js" %}"></script>
     <script src="{% static "plugins/daterangepicker/daterangepicker.js" %}"></script>
     <script>
+
+          $('#example1').DataTable({
+              'paging': true,
+              'lengthChange': false,
+              'searching': false,
+              'ordering': true,
+              'info': true,
+              'autoWidth': false
+          });
 
         //Date range picker
         $('#reservation').daterangepicker({
@@ -184,12 +196,49 @@
                     for (var i = 0; i < data.results.length; i++) {
                         avaliableStocks.push(data.results[i].symbol);
                     }
-                    $('#select-stocks').html(
+                    $('#select-stock').html(
                         avaliableStocks.map(x => '<option>' + x + '</option>')
                     );
                 },
             });
         });
+
+        function apply(){
+            var table = $('#example1').DataTable();
+            var query_type = $('#select-type').val();
+            var stock = $('#select-stock').val();
+            var date_start;
+            var date_end;
+            [date_start, date_end] = $('#reservation').val().split(' - ');
+            $.ajax({
+                type: 'POST',
+                url: '',
+                async: true,
+                data: {query_type: query_type, stock:stock, date_start: date_start, date_end: date_end, 'csrfmiddlewaretoken': '{{ csrf_token }}'},
+                success: function (data) {
+                    console.log(data);
+                    table.clear();
+                    if(data.status === 'ok'){
+                        for(var i=0; i<data.results.length;i++){
+                            item = data.results[i];
+                            table.row.add([
+                                item.name,
+                                item.date,
+                                item.open,
+                                item.high,
+                                item.low,
+                                item.close,
+                                item.volume,
+                            ]);
+                        }
+                        table.draw();
+                    }else{
+                        alert(data.msg);
+                    }
+                },
+            });
+
+        }
 
     </script>
 {% endblock %}

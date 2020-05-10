@@ -1,10 +1,12 @@
 from django.shortcuts import render
 from stockapp.models import *
+from django.db.models import Count, Sum, Max, Min
 from rest_framework import filters, viewsets, generics
 from stockapp.serializers import *
 from django_filters.rest_framework import DjangoFilterBackend
 from django_filters import ModelChoiceFilter, DateFromToRangeFilter, FilterSet
 from django.contrib import auth
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 from django.db import IntegrityError, transaction
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
@@ -118,12 +120,116 @@ def ren2res(template: str, req, dict=None, json_res=False):
     else:
         return render(req, template, dict)
 
-
+@login_required(login_url='/login/')
 def index(req):
     return ren2res("index.html", req, {})
 
-
+@login_required(login_url='/login/')
 def query(req):
+    if req.method == "POST" and req.is_ajax():
+        serialize_hs = lambda hs: [
+                {
+                    'name': h.stock.name,
+                    'date': h.date,
+                    'open': h.open,
+                    'high': h.high,
+                    'low': h.low,
+                    'close': h.close,
+                    'volume': h.volume,
+                } for h in hs
+            ]
+        query_type = req.POST.get('query_type')
+        print("query_type:{}".format(query_type))
+        response = {}
+        if query_type == 'All':
+            stock = req.POST.get('stock')
+            date_start = req.POST.get('date_start')
+            date_end = req.POST.get('date_end')
+            hs = HistoricalPriceTile.objects.all()
+            if stock:
+                hs = hs.filter(stock__symbol=stock)
+            if date_start and date_end:
+                hs = hs.filter(date__gte=date_start).filter(date__lte=date_end)
+            response['status'] = 'ok'
+            response['results'] = serialize_hs(hs)
+        elif query_type == 'Highest':
+            stock = req.POST.get('stock')
+            date_start = req.POST.get('date_start')
+            date_end = req.POST.get('date_end')
+            hs = HistoricalPriceTile.objects.all()
+            if stock:
+                hs = hs.filter(stock__symbol=stock)
+            if date_start and date_end:
+                hs = hs.filter(date__gte=date_start).filter(date__lte=date_end)
+            hs = hs.filter(high=hs.aggregate(Max('high'))['high__max'])
+            print(hs)
+            response['status'] = 'ok'
+            response['results'] = serialize_hs(hs)
+        elif query_type == 'Average':
+            stock = req.POST.get('stock')
+            date_start = req.POST.get('date_start')
+            date_end = req.POST.get('date_end')
+            hs = HistoricalPriceTile.objects.all()
+            if stock:
+                hs = hs.filter(stock__symbol=stock)
+            if date_start and date_end:
+                hs = hs.filter(date__gte=date_start).filter(date__lte=date_end)
+            response['status'] = 'ok'
+            response['results'] = [
+                {
+                    'name': hs[0].stock.name,
+                    'date': '{} -- {}'.format(date_start, date_end),
+                    'open': hs.aggregate(Sum('open'))['open__sum'] / hs.count(),
+                    'high': hs.aggregate(Sum('high'))['high__sum'] / hs.count(),
+                    'low': hs.aggregate(Sum('low'))['low__sum'] / hs.count(),
+                    'close': hs.aggregate(Sum('close'))['close__sum'] / hs.count(),
+                    'volume': hs.aggregate(Sum('volume'))['volume__sum'] / hs.count(),
+                }
+            ]
+        elif query_type == 'Lowest':
+            stock = req.POST.get('stock')
+            date_start = req.POST.get('date_start')
+            date_end = req.POST.get('date_end')
+            hs = HistoricalPriceTile.objects.all()
+            if stock:
+                hs = hs.filter(stock__symbol=stock)
+            if date_start and date_end:
+                hs = hs.filter(date__gte=date_start).filter(date__lte=date_end)
+            hs = hs.filter(low=hs.aggregate(Min('low'))['low__min'])
+            print(hs)
+            response['status'] = 'ok'
+            response['results'] = serialize_hs(hs)
+        elif query_type == 'AverageLessThanLowest':
+            stock = req.POST.get('stock')
+            date_start = req.POST.get('date_start')
+            date_end = req.POST.get('date_end')
+            hs = HistoricalPriceTile.objects.all()
+            if stock:
+                hs = hs.filter(stock__symbol=stock)
+            if date_start and date_end:
+                hs = hs.filter(date__gte=date_start).filter(date__lte=date_end)
+            low = hs.aggregate(Min('low'))['low__min']
+            response['status'] = 'ok'
+            response['results'] = []
+            for stock in Stock.objects.all():
+                hs = HistoricalPriceTile.objects.filter(stock=stock)
+                if date_start and date_end:
+                    hs = hs.filter(date__gte=date_start).filter(date__lte=date_end)
+                average = hs.aggregate(Sum('high'))['high__sum'] / hs.count()
+                if average <= low:
+                    response['results'].append({
+                        'name': hs[0].stock.name,
+                        'date': '{} -- {}'.format(date_start, date_end),
+                        'open': hs.aggregate(Sum('open'))['open__sum'] / hs.count(),
+                        'high': hs.aggregate(Sum('high'))['high__sum'] / hs.count(),
+                        'low': hs.aggregate(Sum('low'))['low__sum'] / hs.count(),
+                        'close': hs.aggregate(Sum('close'))['close__sum'] / hs.count(),
+                        'volume': hs.aggregate(Sum('volume'))['volume__sum'] / hs.count(),
+                    })
+
+        return JsonResponse(response)
+
+
     return ren2res("query.html", req, {})
 
 
