@@ -85,6 +85,32 @@ class IndicatorViewSet(viewsets.ModelViewSet):
             permission_classes = [IsAdminUser]
         return [permission() for permission in permission_classes]
 
+class PredictionFilter(FilterSet):
+    stock = ModelChoiceFilter(queryset=Stock.objects.all())
+    price__date = DateFromToRangeFilter()
+
+    class Meta:
+        model = Prediction
+        fields = ['name', 'price__stock', 'price__date']
+
+class PredictionViewSet(viewsets.ModelViewSet):
+    """
+    Prediction stored in the db.
+    """
+    serializer_class = PredictionSerializer
+    queryset = Prediction.objects.all()
+    filter_backends = [DjangoFilterBackend]
+    filter_class = PredictionFilter
+    filterset_fields = ['name', 'price__stock', 'price__date']
+    def get_permissions(self):
+        if self.action == 'list':
+            permission_classes = [IsAuthenticated]
+        elif self.action == 'retrieve':
+            permission_classes = [IsAuthenticated]
+        else:
+            permission_classes = [IsAdminUser]
+        return [permission() for permission in permission_classes]
+
 
 class LiveViewSet(viewsets.ModelViewSet):
     """
@@ -140,7 +166,7 @@ def query(req):
             ]
         query_type = req.POST.get('query_type')
         print("query_type:{}".format(query_type))
-        response = {}
+        response = {'status':'err', 'msg':'Server Error'}
         if query_type == 'All':
             stock = req.POST.get('stock')
             date_start = req.POST.get('date_start')

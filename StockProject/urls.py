@@ -25,6 +25,7 @@ router = routers.DefaultRouter()
 router.register(r'stocks', views.StockViewSet)
 router.register(r'historical', views.HistoricalViewSet)
 router.register(r'indicator', views.IndicatorViewSet)
+router.register(r'prediction', views.PredictionViewSet)
 router.register(r'live', views.LiveViewSet)
 
 schema_view = get_schema_view(

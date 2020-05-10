@@ -53,3 +53,9 @@ class Indicator(models.Model):
     price = models.ForeignKey(HistoricalPriceTile, related_name='indicators', on_delete=models.CASCADE)
     value = models.DecimalField(max_digits=32, decimal_places=16, blank=True, null=True)
 
+class Prediction(models.Model):
+    name = models.CharField(max_length=16)
+    price = models.ForeignKey(HistoricalPriceTile, related_name='predictions', on_delete=models.CASCADE)
+    value = models.DecimalField(max_digits=32, decimal_places=16, blank=True, null=True)
+    next = models.DecimalField(max_digits=32, decimal_places=16, blank=True, null=True)
+

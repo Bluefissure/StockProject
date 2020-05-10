@@ -21,3 +21,8 @@ class LivePriceTileSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = LivePriceTile
         fields =('__all__')
+
+class PredictionSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Prediction
+        fields = ('__all__')

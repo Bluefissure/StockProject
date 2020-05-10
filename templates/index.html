@@ -220,6 +220,23 @@
             return results;
         }
 
+        function get_prediction(stock, algorithm, date_start, date_end, page) {
+            results = [];
+            $.ajax({
+                type: 'GET',
+                url: '/api/prediction/',
+                async: false,
+                data: {price__stock: stock, price__date_after: date_start, price__date_before: date_end, page: page, name:algorithm},
+                success: function (data) {
+                    results = results.concat(data.results);
+                    if(data.next !== null){
+                        results = results.concat(get_prediction(stock, algorithm, date_start, date_end, page+1));
+                    }
+                },
+            });
+            return results;
+        }
+
         function apply() {
             var lineChartCanvas = $('#lineChart').get(0).getContext('2d');
             var lineChartOptions = {
@@ -278,6 +295,7 @@
             if(stocks.length > 1) {
                 lineChartOptions.legend.display = true;
             } else {
+                // indicators
                 var indicators = $('#select-indicators').val();
                 if (indicators.length > 0){
                     lineChartOptions.legend.display = true;
@@ -309,6 +327,72 @@
                         });
                     }
 
+                }
+                // algorithm
+                var algorithm = $('#select-algorithm').val();
+                console.log('algorithm:'+algorithm);
+                if(algorithm !== ''){
+                    lineChartOptions.legend.display = true;
+                    results = get_prediction(stocks[0], algorithm, date_start, date_end, 1);
+                    labels.push('pred');
+                    var datalist;
+                    if(algorithm !== 'SVM'){
+                        if(results.length > 0)
+                            datalist = results.map(x => x.value).concat([results[results.length-1].next]);
+                        var color = '#ff0000';
+                        datasets.push({
+                            label: algorithm,
+                            backgroundColor: color,
+                            borderColor: color,
+                            fill: false,
+                            pointRadius: false,
+                            pointStrokeColor: color,
+                            pointHighlightStroke: color,
+                            data: datalist,
+                            spanGaps: true,
+                            yAxisID: 'stock',
+                        });
+                    }else{
+                        var datalist_pos = [];
+                        var datalist_neg = [];
+                        for(var i=0; i<results.length; i++){
+                            var result = results[i];
+                            if(result.value > 0){
+                                datalist_pos.push(result.value);
+                                datalist_neg.push(null);
+                            }else{
+                                datalist_pos.push(null);
+                                datalist_neg.push(-result.value);
+                            }
+                        }
+                        if(results.length > 0)
+                            datalist = results.map(x => x.value).concat([results[results.length-1].next]);
+                        var color = '#66B032', neg_color = '#ff0000';
+                        datasets.push({
+                            label: algorithm+'_inc',
+                            backgroundColor: color,
+                            borderColor: color,
+                            fill: false,
+                            pointRadius: 15,
+                            pointStrokeColor: color,
+                            pointHighlightStroke: color,
+                            data: datalist_pos,
+                            spanGaps: false,
+                            yAxisID: 'stock',
+                        });
+                        datasets.push({
+                            label: algorithm+'_dec',
+                            backgroundColor: neg_color,
+                            borderColor: neg_color,
+                            fill: false,
+                            pointRadius: 15,
+                            pointStrokeColor: neg_color,
+                            pointHighlightStroke: neg_color,
+                            data: datalist_neg,
+                            spanGaps: false,
+                            yAxisID: 'stock',
+                        });
+                    }
                 }
             }
             var lineChartData = {
