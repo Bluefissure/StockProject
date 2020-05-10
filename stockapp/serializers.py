@@ -12,6 +12,11 @@ class HistoricalPriceTileSerializer(serializers.HyperlinkedModelSerializer):
         model = HistoricalPriceTile
         fields =('__all__')
 
+class IndicatorSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Indicator
+        fields =('__all__')
+
 class LivePriceTileSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = LivePriceTile

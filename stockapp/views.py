@@ -1,16 +1,19 @@
 from django.shortcuts import render
 from stockapp.models import *
-from rest_framework import viewsets, generics
+from rest_framework import filters, viewsets, generics
 from stockapp.serializers import *
 from django_filters.rest_framework import DjangoFilterBackend
+from django_filters import ModelChoiceFilter, DateFromToRangeFilter, FilterSet
 from django.contrib import auth
 from django.http import HttpResponseRedirect
 from django.db import IntegrityError, transaction
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 
 from django.http import JsonResponse
 
 import traceback
 # Create your views here.
+
 
 
 class StockViewSet(viewsets.ModelViewSet):
@@ -19,6 +22,22 @@ class StockViewSet(viewsets.ModelViewSet):
     """
     queryset = Stock.objects.all()
     serializer_class = StockSerializer
+    def get_permissions(self):
+        if self.action == 'list':
+            permission_classes = [IsAuthenticated]
+        elif self.action == 'retrieve':
+            permission_classes = [IsAuthenticated]
+        else:
+            permission_classes = [IsAdminUser]
+        return [permission() for permission in permission_classes]
+
+class HistoricalFilter(FilterSet):
+    stock = ModelChoiceFilter(queryset=Stock.objects.all())
+    date = DateFromToRangeFilter()
+
+    class Meta:
+        model = HistoricalPriceTile
+        fields = ['stock', 'date']
 
 class HistoricalViewSet(viewsets.ModelViewSet):
     """
@@ -27,7 +46,43 @@ class HistoricalViewSet(viewsets.ModelViewSet):
     serializer_class = HistoricalPriceTileSerializer
     queryset = HistoricalPriceTile.objects.all()
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['stock']
+    filter_class = HistoricalFilter
+    filterset_fields = ['stock', 'date']
+    def get_permissions(self):
+        if self.action == 'list':
+            permission_classes = [IsAuthenticated]
+        elif self.action == 'retrieve':
+            permission_classes = [IsAuthenticated]
+        else:
+            permission_classes = [IsAdminUser]
+        return [permission() for permission in permission_classes]
+
+class IndicatorFilter(FilterSet):
+    stock = ModelChoiceFilter(queryset=Stock.objects.all())
+    price__date = DateFromToRangeFilter()
+
+    class Meta:
+        model = Indicator
+        fields = ['name', 'price__stock', 'price__date']
+
+class IndicatorViewSet(viewsets.ModelViewSet):
+    """
+    Indicator stored in the db.
+    """
+    serializer_class = IndicatorSerializer
+    queryset = Indicator.objects.all()
+    filter_backends = [DjangoFilterBackend]
+    filter_class = IndicatorFilter
+    filterset_fields = ['name', 'price__stock', 'price__date']
+    def get_permissions(self):
+        if self.action == 'list':
+            permission_classes = [IsAuthenticated]
+        elif self.action == 'retrieve':
+            permission_classes = [IsAuthenticated]
+        else:
+            permission_classes = [IsAdminUser]
+        return [permission() for permission in permission_classes]
+
 
 class LiveViewSet(viewsets.ModelViewSet):
     """
@@ -37,6 +92,14 @@ class LiveViewSet(viewsets.ModelViewSet):
     queryset = LivePriceTile.objects.all()
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['stock']
+    def get_permissions(self):
+        if self.action == 'list':
+            permission_classes = [IsAuthenticated]
+        elif self.action == 'retrieve':
+            permission_classes = [IsAuthenticated]
+        else:
+            permission_classes = [IsAdminUser]
+        return [permission() for permission in permission_classes]
 
 
 def ren2res(template: str, req, dict=None, json_res=False):
@@ -58,6 +121,10 @@ def ren2res(template: str, req, dict=None, json_res=False):
 
 def index(req):
     return ren2res("index.html", req, {})
+
+
+def query(req):
+    return ren2res("query.html", req, {})
 
 
 def login(req):

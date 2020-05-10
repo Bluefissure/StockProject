@@ -24,6 +24,7 @@ from stockapp import views
 router = routers.DefaultRouter()
 router.register(r'stocks', views.StockViewSet)
 router.register(r'historical', views.HistoricalViewSet)
+router.register(r'indicator', views.IndicatorViewSet)
 router.register(r'live', views.LiveViewSet)
 
 schema_view = get_schema_view(
@@ -44,6 +45,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.index),
     path('index/', views.index),
+    path('query/', views.query),
     path('register/', views.register),
     path('login/', views.login),
     path('logout/', views.logout),

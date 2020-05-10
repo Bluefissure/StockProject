@@ -18,7 +18,13 @@ class LivePriceTileAdmin(admin.ModelAdmin):
     search_fields = ['stock']
     list_filter = ['stock']
 
+class IndicatorAdmin(admin.ModelAdmin):
+    list_display = ['price', 'name', 'value']
+    search_fields = ['price', 'name']
+    list_filter = ['price__stock', 'name']
+
 
 admin.site.register(Stock, StockAdmin)
 admin.site.register(HistoricalPriceTile, HistoricalPriceTileAdmin)
 admin.site.register(LivePriceTile, LivePriceTileAdmin)
+admin.site.register(Indicator, IndicatorAdmin)

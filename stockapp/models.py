@@ -21,6 +21,9 @@ class HistoricalPriceTile(models.Model):
     adj_close = models.DecimalField(max_digits=32, decimal_places=16)
     volume = models.IntegerField()
 
+    def __str__(self):
+        return "{}--{}".format(self.stock, self.date)
+
     class Meta:
         unique_together = ('stock', 'date')
 
@@ -30,6 +33,9 @@ class LivePriceTile(models.Model):
     time = models.DateTimeField()
     price = models.DecimalField(max_digits=32, decimal_places=16)
     volume = models.IntegerField()
+
+    def __str__(self):
+        return "{}--{}".format(self.stock, self.time)
 
     class Meta:
         unique_together = ('stock', 'time')
@@ -41,3 +47,9 @@ class UserInfo(models.Model):
 
     def __str__(self):
         return str(self.user)
+
+class Indicator(models.Model):
+    name = models.CharField(max_length=16)
+    price = models.ForeignKey(HistoricalPriceTile, related_name='indicators', on_delete=models.CASCADE)
+    value = models.DecimalField(max_digits=32, decimal_places=16, blank=True, null=True)
+

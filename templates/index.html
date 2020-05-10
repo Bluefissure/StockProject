@@ -1,198 +1,333 @@
 {% extends 'layout.html' %}
 {% load static %}
 
+{% block head %}
+
+    <link rel="stylesheet" href="{% static "plugins/daterangepicker/daterangepicker.css" %}">
+{% endblock %}
+
 
 {% block content %}
 
-  <!-- Content Header (Page header) -->
-  {% if err %}
-    <div class="alert alert-danger alert-dismissible">
-      <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
-      <h4><i class="icon fa fa-ban"></i> {{ err.title }}</h4>
-      {{ err.message }}
-    </div>
-  {% endif %}
-  {% if success %}
-    <div class="alert alert-success alert-dismissible">
-      <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
-      <h4><i class="icon fa fa-ban"></i> {{ success.title }}</h4>
-      {{ success.message }}
-    </div>
-  {% endif %}
+    <section class="content-header">
 
-  <div class="content-header">
-    <div class="container-fluid">
-      <h1 class="m-0 text-dark">Test</h1>
-    </div>
-  </div>
+    </section>
 
-  <!-- Main content -->
-  <section class="content">
-    <div class="container-fluid">
-      <div class="row">
-        <div class="col-md-12">
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card card-info">
+                        <div class="card-header">
+                            <h3 class="card-title" id="chart-title">Stock Price</h3>
+                            <div class="card-tools">
+                                <h4 class="card-title" id="chart-info"></h4>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart">
+                                <div class="chartjs-size-monitor">
+                                    <div class="chartjs-size-monitor-expand">
+                                        <div class=""></div>
+                                    </div>
+                                    <div class="chartjs-size-monitor-shrink">
+                                        <div class=""></div>
+                                    </div>
+                                </div>
+                                <canvas id="lineChart"
+                                        style="min-height: 250px; height: 400px; max-height: 400px; max-width: 100%; display: block; width: 764px;"
+                                        width="764" height="250" class="chartjs-render-monitor"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card card-primary">
+                        <div class="card-header with-border">
+                            <h3 class="card-title">Select</h3>
+                        </div>
+                        <!-- form start -->
+                        <div role="form">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Date range</label>
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                    <span class="input-group-text">
+                                      <i class="far fa-calendar-alt"></i>
+                                    </span>
+                                                </div>
+                                                <input type="text" class="form-control float-right" id="reservation">
+                                            </div>
+                                        </div>
 
-          <!-- /.card -->
+                                        <div class="form-group">
+                                            <label> Prediction Algorithm</label>
+                                            <select class="custom-select" id="select-algorithm">
+                                                <option></option>
+                                                <option>Bayesian</option>
+                                                <option>ANN</option>
+                                                <option>SVM</option>
+                                                <option>LSTM</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label> Select Stocks</label>
+                                            <select multiple="" class="custom-select" id="select-stocks">
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label> Select Indicators</label>
+                                            <select multiple="" class="custom-select" id="select-indicators">
+                                                <option>MACD</option>
+                                                <option>ADX</option>
+                                                <option>+VI</option>
+                                                <option>-VI</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- /.card-body -->
+
+                            <div class="card-footer">
+                                <button class="btn btn-primary" onclick="apply()">Apply</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
-  </section>
+    </section>
 
 
 {% endblock %}
 
 
 {% block script %}
-  <!-- jQuery 3 -->
-  <script src="{% static "plugins/jquery/jquery.min.js" %}"></script>
-  <!-- Bootstrap 3.3.7 -->
-  <script src="{% static "plugins/bootstrap/js/bootstrap.bundle.min.js" %}"></script>
-  <!-- DataTables -->
-  <script src="{% static "plugins/datatables/jquery.dataTables.min.js" %}"></script>
-  <script src="{% static "plugins/datatables-bs4/js/dataTables.bootstrap4.min.js" %}"></script>
-  <!-- FastClick -->
-  <script src="{% static "plugins/fastclick/fastclick.js" %}"></script>
-  <!-- AdminLTE App -->
-  <script src="{% static "dist/js/adminlte.min.js" %}"></script>
-  <!-- AdminLTE for demo purposes -->
-  <script src="{% static "dist/js/demo.js" %}"></script>
-  <!-- page script -->
-  <script>
-      $(function () {
-          $('#example1').DataTable({
-              "scrollX": false,
-              "autoWidth": true
-          });
-          $('#example2').DataTable({
-              'paging': true,
-              'lengthChange': false,
-              'searching': false,
-              'ordering': true,
-              'info': true,
-              'autoWidth': false
-          })
-      });
+    <!-- jQuery 3 -->
+    <script src="{% static "plugins/jquery/jquery.min.js" %}"></script>
+    <!-- Bootstrap 3.3.7 -->
+    <script src="{% static "plugins/bootstrap/js/bootstrap.bundle.min.js" %}"></script>
+    <!-- DataTables -->
+    <script src="{% static "plugins/datatables/jquery.dataTables.min.js" %}"></script>
+    <script src="{% static "plugins/datatables-bs4/js/dataTables.bootstrap4.min.js" %}"></script>
+    <!-- FastClick -->
+    <script src="{% static "plugins/fastclick/fastclick.js" %}"></script>
+    <!-- AdminLTE App -->
+    <script src="{% static "dist/js/adminlte.min.js" %}"></script>
+    <!-- AdminLTE for demo purposes -->
+    <script src="{% static "dist/js/demo.js" %}"></script>
 
-      function switch_public(id) {
-          var token = prompt("请输入Token:");
-          $.ajax({
-              type: 'POST',
-              url: '',
-              async: false,
-              data: {"optype": "switch_public", "token": token, "id": id, 'csrfmiddlewaretoken': '{{ csrf_token }}'},
-              success: function (data) {
-                  if (data.response != "success") {
-                      if (data.response == "error") {
-                          alert(data.msg);
-                      } else {
-                          alert(data.response);
-                          console.log(data);
-                      }
-                  } else {
-                      alert("操作成功！");
-                      location.reload();
-                  }
-              },
-          });
-      }
+    <script src="{% static "plugins/chart.js/Chart.min.js" %}"></script>
+    <script src="{% static "plugins/moment/moment.min.js" %}"></script>
+    <script src="{% static "plugins/daterangepicker/daterangepicker.js" %}"></script>
+    <script>
 
-      function del_bot(id) {
-          var token = prompt("请输入Token:");
-          $.ajax({
-              type: 'POST',
-              url: '',
-              async: false,
-              data: {"optype": "del_bot", "token": token, "id": id, 'csrfmiddlewaretoken': '{{ csrf_token }}'},
-              success: function (data) {
-                  if (data.response != "success") {
-                      if (data.response == "error") {
-                          alert(data.msg);
-                      } else {
-                          alert(data.response);
-                          console.log(data);
-                      }
-                  } else {
-                      alert("操作成功！");
-                      location.reload();
-                  }
-              },
-          });
-      }
-
-      function download_conf(id) {
-          var token = prompt("请输入Token:");
-          var request = new XMLHttpRequest();
-          request.open('POST', '', true);
-          request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-          request.setRequestHeader('X-CSRFToken', '{{ csrf_token }}');
-          request.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
-          request.responseType = 'blob';
-          request.onload = function(e) {
-              if (this.status === 200) {
-                var blob = this.response;
-                var fileName = "config.json";
-                console.log(blob);
-                if(window.navigator.msSaveOrOpenBlob) {
-                  window.navigator.msSaveBlob(blob, fileName);
-                } else {
-                  var downloadLink = window.document.createElement('a');
-                  var contentTypeHeader = request.getResponseHeader("Content-Type");
-                  downloadLink.href = window.URL.createObjectURL(new Blob([blob], { type: contentTypeHeader }));
-                  var contentDispositionHeader = request.getResponseHeader("Content-Disposition");
-                  var ma = contentDispositionHeader.match(/filename="(\d+.json)"/);
-                  if (ma != null) fileName = ma[1];
-                  downloadLink.download = fileName;
-                  document.body.appendChild(downloadLink);
-                  downloadLink.click();
-                  document.body.removeChild(downloadLink);
-               }
+        //Date range picker
+        $('#reservation').daterangepicker({
+            startDate: moment().add(-365, 'day'),
+            locale: {
+                format: 'YYYY-MM-DD',
             }
-          };
-          request.send("optype=download_conf&token="+token+"&id="+id+'&csrfmiddlewaretoken='+'{{ csrf_token }}');
-      }
+        });
+        //Date range as a button
+        $('#daterange-btn').daterangepicker(
+            {
+                ranges: {
+                    'Today': [moment(), moment()],
+                    'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                    'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+                    'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+                    'This Month': [moment().startOf('month'), moment().endOf('month')],
+                    'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+                },
+                startDate: moment().subtract(29, 'days'),
+                endDate: moment()
+            },
+            function (start, end) {
+                $('#reportrange span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'))
+            }
+        );
 
-      function add_or_update_bot() {
-          var botName = document.getElementById("botName").value;
-          var botID = document.getElementById("botID").value;
-          var ownerID = document.getElementById("ownerID").value;
-          var accessToken = document.getElementById("accessToken").value;
-          var tulingToken = document.getElementById("tulingToken").value;
-          var api_post_url = document.getElementById("api_post_url").value;
-          var autoFriend = document.getElementById("autoFriend").checked;
-          var autoInvite = document.getElementById("autoInvite").checked;
-          $.ajax({
-              type: 'POST',
-              url: '',
-              async: false,
-              data: {
-                  "optype": "add_or_update_bot",
-                  "botName": botName,
-                  "botID": botID,
-                  "ownerID": ownerID,
-                  "accessToken": accessToken,
-                  "tulingToken": tulingToken,
-                  "api_post_url": api_post_url,
-                  "autoFriend": autoFriend,
-                  "autoInvite": autoInvite,
-                  'csrfmiddlewaretoken': '{{ csrf_token }}'
-              },
-              success: function (data) {
-                  if (data.response != "success") {
-                      if (data.response == "error") {
-                          alert(data.msg);
-                      } else {
-                          alert(data.response);
-                          console.log(data);
-                      }
-                  } else {
-                      prompt(data.msg, data.token);
-                      location.reload();
-                  }
-              },
-          });
-      }
-  </script>
+
+    </script>
+    <!-- page script -->
+    <script>
+        $(function () {
+
+            //-------------
+            //- LINE CHART -
+            //--------------
+            var avaliableStocks = [];
+            var stockChart;
+            $.ajax({
+                type: 'GET',
+                url: '/api/stocks/',
+                async: false,
+                data: {},
+                success: function (data) {
+                    for (var i = 0; i < data.results.length; i++) {
+                        avaliableStocks.push(data.results[i].symbol);
+                    }
+                    $('#select-stocks').html(
+                        avaliableStocks.map(x => '<option>' + x + '</option>')
+                    );
+                },
+            });
+        });
+
+        function get_historical(stock, date_start, date_end, page) {
+            results = [];
+            $.ajax({
+                type: 'GET',
+                url: '/api/historical/',
+                async: false,
+                data: {stock: stock, date_after: date_start, date_before: date_end, page: page},
+                success: function (data) {
+                    results = results.concat(data.results);
+                    if(data.next !== null){
+                        results = results.concat(get_historical(stock, date_start, date_end, page+1));
+                    }
+                },
+            });
+            return results;
+        }
+
+        function get_indicator(stock, indicator, date_start, date_end, page) {
+            results = [];
+            $.ajax({
+                type: 'GET',
+                url: '/api/indicator/',
+                async: false,
+                data: {price__stock: stock, price__date_after: date_start, price__date_before: date_end, page: page, name:indicator},
+                success: function (data) {
+                    results = results.concat(data.results);
+                    if(data.next !== null){
+                        results = results.concat(get_indicator(stock, indicator, date_start, date_end, page+1));
+                    }
+                },
+            });
+            return results;
+        }
+
+        function apply() {
+            var lineChartCanvas = $('#lineChart').get(0).getContext('2d');
+            var lineChartOptions = {
+                maintainAspectRatio: false,
+                responsive: true,
+                legend: {
+                    display: false
+                },
+                scales: {
+                    xAxes: [{
+                        gridLines: {
+                            display: false,
+                        }
+                    }],
+                    yAxes: [{
+                        id: 'stock',
+                        position: 'left',
+                        gridLines: {
+                            display: false,
+                        }
+                    }]
+                }
+            };
+
+            var stocks = $('#select-stocks').val();
+            var date_start;
+            var date_end;
+            [date_start, date_end] = $('#reservation').val().split(' - ');
+            var datasets = [];
+            var colors = [
+                '#236AB9',
+                '#66B032',
+                '#26b8bc',
+                '#700CBC',
+                '#FC7307',
+            ];
+            var labels = [];
+            for (var i = 0; i < stocks.length; i++) {
+                results = get_historical(stocks[i], date_start, date_end, 1);
+                labels = results.map(x => x.date);
+                datasets.push({
+                    label: stocks[i],
+                    backgroundColor: colors[i%colors.length],
+                    borderColor: colors[i%colors.length],
+                    fill: false,
+                    pointRadius: false,
+                    pointColor: '#3b8bba',
+                    pointStrokeColor: colors[i%colors.length],
+                    pointHighlightFill: '#fff',
+                    pointHighlightStroke: colors[i%colors.length],
+                    data: results.map(x => x.open),
+                    spanGaps: true,
+                    yAxisID: 'stock',
+                });
+            }
+            if(stocks.length > 1) {
+                lineChartOptions.legend.display = true;
+            } else {
+                var indicators = $('#select-indicators').val();
+                if (indicators.length > 0){
+                    lineChartOptions.legend.display = true;
+                    lineChartOptions.scales.yAxes.push({
+                        id: 'indicator',
+                        position: 'right',
+                        gridLines: {
+                            display: false,
+                        }
+                    });
+                    var indicator;
+                    for(i=0; i<indicators.length; i++){
+                        indicator = indicators[i];
+                        results = get_indicator(stocks[0], indicator, date_start, date_end, 1);
+                        var color = colors[(colors.length-i-1)%colors.length];
+                        datasets.push({
+                            label: indicator,
+                            backgroundColor: color,
+                            borderColor: color,
+                            borderDash: [5, 5],
+                            fill: false,
+                            pointRadius: false,
+                            pointStrokeColor: color,
+                            pointHighlightStroke: color,
+                            data: results.map(x => x.value),
+                            spanGaps: true,
+                            yAxisID: 'indicator',
+
+                        });
+                    }
+
+                }
+            }
+            var lineChartData = {
+                labels: labels,
+                datasets: datasets
+            };
+            {#console.log(lineChartData);#}
+            lineChartOptions.datasetFill = false;
+
+            if(typeof(stockChart) !== "undefined"){
+                stockChart.destroy();
+            }
+
+            stockChart = new Chart(lineChartCanvas, {
+                type: 'line',
+                data: lineChartData,
+                options: lineChartOptions
+            });
+        }
+
+    </script>
 {% endblock %}
-
-</body>
-</html>
