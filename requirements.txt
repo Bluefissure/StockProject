@@ -28,6 +28,6 @@ urllib3==1.25.8
 w3lib==1.21.0
 websockets==8.1
 yahoo-fin==0.8.4
-djangorestframework==3.11.0
+djangorestframework==3.11.2
 django-filter==2.2.0
 drf-yasg==1.17.1
